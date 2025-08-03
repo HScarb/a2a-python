@@ -10,10 +10,16 @@ try:
 except ImportError:
     GrpcTransport = None  # type: ignore
 
+try:
+    from a2a.client.transports.rabbitmq import RabbitMQClientTransport
+except ImportError:
+    RabbitMQClientTransport = None  # type: ignore
+
 
 __all__ = [
     'ClientTransport',
     'GrpcTransport',
     'JsonRpcTransport',
+    'RabbitMQClientTransport',
     'RestTransport',
 ]

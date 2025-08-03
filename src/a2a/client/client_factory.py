@@ -25,6 +25,11 @@ try:
 except ImportError:
     GrpcTransport = None  # type: ignore # pyright: ignore
 
+try:
+    from a2a.client.transports.rabbitmq import RabbitMQClientTransport
+except ImportError:
+    RabbitMQClientTransport = None  # type: ignore # pyright: ignore
+
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +101,16 @@ class ClientFactory:
             self.register(
                 TransportProtocol.grpc,
                 GrpcTransport.create,
+            )
+        if TransportProtocol.rabbitmq in supported:
+            if RabbitMQClientTransport is None:
+                raise ImportError(
+                    'To use RabbitMQ transport, its dependencies must be installed. '
+                    'You can install them with \'pip install "a2a-sdk[rabbitmq]"\''
+                )
+            self.register(
+                TransportProtocol.rabbitmq,
+                lambda card, url, config, interceptors: RabbitMQClientTransport(card),  # type: ignore
             )
 
     def register(self, label: str, generator: TransportProducer) -> None:

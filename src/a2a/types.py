@@ -1029,6 +1029,7 @@ class TransportProtocol(str, Enum):
     jsonrpc = 'JSONRPC'
     grpc = 'GRPC'
     http_json = 'HTTP+JSON'
+    rabbitmq = 'RABBITMQ'
 
 
 class UnsupportedOperationError(A2ABaseModel):
@@ -1793,6 +1794,10 @@ class AgentCard(A2ABaseModel):
     """
     Information about the agent's service provider.
     """
+    rabbitmq: RabbitMQConfig | None = None
+    """
+    RabbitMQ-specific configuration for the agent. Only present when RabbitMQ transport is supported.
+    """
     security: list[dict[str, list[str]]] | None = Field(
         default=None,
         examples=[[{'oauth': ['read']}, {'api-key': [], 'mtls': []}]],
@@ -2038,4 +2043,31 @@ class SendStreamingMessageResponse(
     root: JSONRPCErrorResponse | SendStreamingMessageSuccessResponse
     """
     Represents a JSON-RPC response for the `message/stream` method.
+    """
+
+
+class RabbitMQConfig(A2ABaseModel):
+    """
+    RabbitMQ-specific configuration for an agent.
+    """
+
+    vhost: str | None = None
+    """
+    The RabbitMQ virtual host. Defaults to '/'.
+    """
+    request_queue: str
+    """
+    The queue name where the server listens for RPC requests.
+    """
+    rpc_exchange: str | None = None
+    """
+    The exchange used for RPC calls. If not provided, uses the default exchange.
+    """
+    streaming_exchange: str | None = None
+    """
+    The direct exchange used for streaming communication. Required if streaming capability is enabled.
+    """
+    push_notification_exchange: str | None = None
+    """
+    The direct exchange used for push notifications. Required if push notifications capability is enabled.
     """
