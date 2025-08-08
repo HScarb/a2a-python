@@ -25,6 +25,11 @@ try:
 except ImportError:
     GrpcTransport = None  # type: ignore # pyright: ignore
 
+try:
+    from a2a.client.transports.kafka import KafkaClientTransport
+except ImportError:
+    KafkaClientTransport = None  # type: ignore # pyright: ignore
+
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +101,16 @@ class ClientFactory:
             self.register(
                 TransportProtocol.grpc,
                 GrpcTransport.create,
+            )
+        if TransportProtocol.kafka in supported:
+            if KafkaClientTransport is None:
+                raise ImportError(
+                    'To use KafkaClient, its dependencies must be installed. '
+                    'You can install them with \'pip install "a2a-sdk[kafka]"\''
+                )
+            self.register(
+                TransportProtocol.kafka,
+                KafkaClientTransport.create,
             )
 
     def register(self, label: str, generator: TransportProducer) -> None:
